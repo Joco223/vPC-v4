@@ -1,0 +1,10 @@
+set reg0 50 ;set register 0 to 50
+alloc 10 ;alloc 10 memory sets
+allocm 0 10; alloc 10 memory slots in 0th memory set
+allocm 1 1; alloc 1 memory slot in 0th memory set;
+set reg1 #0-0 ;set register 1 to 0th memory slot from 0th memory set
+add reg0 reg99
+outu reg0
+set #1-0 reg0
+set reg5 #1-0
+outu reg5

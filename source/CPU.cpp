@@ -19,15 +19,15 @@ void CPU::process() {
 			halt = true;
 			break;
 
-		case 0x01: registers[c_ins.arguments[0]] = c_ins.arguments[1]; break;
-		case 0x02: registers[c_ins.arguments[0]] = registers[c_ins.arguments[1]]; break;
-		case 0x03: registers[c_ins.arguments[0]] = functions.back().memory[c_ins.arguments[1]][c_ins.arguments[2]]; break;
-		case 0x04: registers[c_ins.arguments[0]] = functions.back().memory[registers[c_ins.arguments[1]]][c_ins.arguments[2]]; break;
-		case 0x05: registers[c_ins.arguments[0]] = functions.back().memory[c_ins.arguments[1]][registers[c_ins.arguments[2]]]; break;
-		case 0x06: registers[c_ins.arguments[0]] = functions.back().memory[registers[c_ins.arguments[1]]][registers[c_ins.arguments[2]]]; break;
-		case 0x07: functions.back().memory[c_ins.arguments[0]][c_ins.arguments[1]] = registers[c_ins.arguments[2]]; break;
-		case 0x08: functions.back().memory[registers[c_ins.arguments[0]]][c_ins.arguments[1]] = registers[c_ins.arguments[2]]; break;
-		case 0x09: functions.back().memory[c_ins.arguments[0]][registers[c_ins.arguments[1]]] = registers[c_ins.arguments[2]]; break;
+		case 0x01: registers[c_ins.arguments[0]]                                                         = c_ins.arguments[1]; break;
+		case 0x02: registers[c_ins.arguments[0]]                                                         = registers[c_ins.arguments[1]]; break;
+		case 0x03: registers[c_ins.arguments[0]]                                                         = functions.back().memory[c_ins.arguments[1]][c_ins.arguments[2]]; break;
+		case 0x04: registers[c_ins.arguments[0]]                                                         = functions.back().memory[registers[c_ins.arguments[1]]][c_ins.arguments[2]]; break;
+		case 0x05: registers[c_ins.arguments[0]]                                                         = functions.back().memory[c_ins.arguments[1]][registers[c_ins.arguments[2]]]; break;
+		case 0x06: registers[c_ins.arguments[0]]                                                         = functions.back().memory[registers[c_ins.arguments[1]]][registers[c_ins.arguments[2]]]; break;
+		case 0x07: functions.back().memory[c_ins.arguments[0]][c_ins.arguments[1]]                       = registers[c_ins.arguments[2]]; break;
+		case 0x08: functions.back().memory[registers[c_ins.arguments[0]]][c_ins.arguments[1]]            = registers[c_ins.arguments[2]]; break;
+		case 0x09: functions.back().memory[c_ins.arguments[0]][registers[c_ins.arguments[1]]]            = registers[c_ins.arguments[2]]; break;
 		case 0x0A: functions.back().memory[registers[c_ins.arguments[0]]][registers[c_ins.arguments[1]]] = registers[c_ins.arguments[2]]; break;
 
 		case 0x0B: registers[c_ins.arguments[0]] += registers[c_ins.arguments[1]]; break;
@@ -44,9 +44,9 @@ void CPU::process() {
 		case 0x10: registers[c_ins.arguments[0]]++; break;
 		case 0x11: registers[c_ins.arguments[0]]--; break;
 
-		case 0x12: registers[c_ins.arguments[0]] = registers[c_ins.arguments[0]] > registers[c_ins.arguments[1]]; break;
+		case 0x12: registers[c_ins.arguments[0]] = registers[c_ins.arguments[0]]  > registers[c_ins.arguments[1]]; break;
 		case 0x13: registers[c_ins.arguments[0]] = registers[c_ins.arguments[0]] >= registers[c_ins.arguments[1]]; break;
-		case 0x14: registers[c_ins.arguments[0]] = registers[c_ins.arguments[0]] < registers[c_ins.arguments[1]]; break;
+		case 0x14: registers[c_ins.arguments[0]] = registers[c_ins.arguments[0]]  < registers[c_ins.arguments[1]]; break;
 		case 0x15: registers[c_ins.arguments[0]] = registers[c_ins.arguments[0]] <= registers[c_ins.arguments[1]]; break;
 		case 0x16: registers[c_ins.arguments[0]] = registers[c_ins.arguments[0]] == registers[c_ins.arguments[1]]; break;
 		case 0x17: registers[c_ins.arguments[0]] = registers[c_ins.arguments[0]] != registers[c_ins.arguments[1]]; break;
@@ -108,7 +108,6 @@ void CPU::tick() {
 				functions.pop_back();
 			}
 		}
-		//std::cout << '#' << functions.back().instruction_counter << '\n';
 		process();
 	}
 }
