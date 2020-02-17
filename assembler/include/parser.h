@@ -26,17 +26,21 @@ namespace parser {
   }
 
   std::vector<token> tokenize(std::string& input) {
+    input += " \n";
     std::regex comment_reg(";(.)*");
     input = std::regex_replace(input, comment_reg, " ");
     input = std::regex_replace(input, std::regex("\n"), " \n");
+    input = std::regex_replace(input, std::regex("\t"), " ");
 
     std::vector<std::string> lines = split(input, '\n');
     std::vector<token> tokens;
-    
+
     for (int i = 0; i < lines.size(); i++) {
       std::vector<std::string> split_tokens = split(lines[i], ' ');
-      for (int j = 0; j < split_tokens.size(); j++)
-        tokens.push_back({split_tokens[j], i, j});
+      for (int j = 0; j < split_tokens.size(); j++) {
+        if (split_tokens[j] != "")
+          tokens.push_back({split_tokens[j], i, j});
+      }
     }
 
     return tokens;
@@ -46,7 +50,7 @@ namespace parser {
   const std::vector<std::string> valid_instructions = {"set"  , "add"     , "sub"  , "mlt" , "div" , "mod" , "inc" , "dec" , "bigg", "bigg_eq",
                                                        "small", "small_eq", "equal", "diff", "jmp" , "jmpz", "jmpo", "call", "ret" , 
                                                        "alloc", "allocm"  , "outu" , "outs", "outc"};
-  const std::vector<std::string> valid_keywords     = {"func", "{", "}"};
+  const std::vector<std::string> valid_keywords     = {"func", "[", "]"};
 
   std::string assemble_address_regex() {
     std::string output = "^#((\\d)+|(";
@@ -74,7 +78,7 @@ namespace parser {
       if (std::find(valid_instructions.begin(), valid_instructions.end(), i.token) != valid_instructions.end()) continue; //* Valid instruction token
       if (std::find(valid_keywords.begin()    , valid_keywords.end()    , i.token) != valid_keywords.end())     continue; //* Valid keyword
       if (std::regex_match(i.token, address_reg)) continue;                                                               //* Valid address pattern
-      if (i.token.find_first_not_of( "0123456789" ) == std::string::npos) continue;                                       //* Valid number
+      if (i.token.find_first_not_of("0123456789") == std::string::npos) continue;                                         //* Valid number
       if (index > 0 && (tokens[index-1].token == "func" || tokens[index-1].token == "call")) continue;                    //* Not checking function names
 
       std::cerr << "Token: \"" << i.token << "\" on line: " << (i.line+1) << ", position: " << (i.position+1) << " doesn't match any valid token. Aborting.\n";

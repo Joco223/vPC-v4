@@ -1,7 +1,12 @@
+func what [
+	set reg0 #0-0
+	outu reg0
+]
+
 alloc 2
 allocm 0 1
 allocm 1 1
 set reg0 5
-set #0-0 reg
+set #0-0 reg0
 set reg0 10
 set #1-0 reg0

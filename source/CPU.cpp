@@ -83,11 +83,15 @@ void CPU::process() {
 				break;
 			}
 		case 0x1D: functions.back().memory.resize(functions.back().memory.size() + c_ins.arguments[0]); break;
-		case 0x1E: functions.back().memory[c_ins.arguments[0]].resize(functions.back().memory[c_ins.arguments[0]].size() + c_ins.arguments[1]); break;
+		case 0x1E: functions.back().memory.resize(functions.back().memory.size() + registers[c_ins.arguments[0]]); break;
+		case 0x1F: functions.back().memory[c_ins.arguments[0]].resize(functions.back().memory[c_ins.arguments[0]].size() + c_ins.arguments[1]); break;
+		case 0x20: functions.back().memory[c_ins.arguments[0]].resize(functions.back().memory[registers[c_ins.arguments[0]]].size() + c_ins.arguments[1]); break;
+		case 0x21: functions.back().memory[c_ins.arguments[0]].resize(functions.back().memory[c_ins.arguments[0]].size() + registers[c_ins.arguments[1]]); break;
+		case 0x22: functions.back().memory[c_ins.arguments[0]].resize(functions.back().memory[registers[c_ins.arguments[0]]].size() + registers[c_ins.arguments[1]]); break;
 
-		case 0x1F: std::cout << registers[c_ins.arguments[0]]; break;
-		case 0x20: std::cout << (int)registers[c_ins.arguments[0]]; break;
-		case 0x21: std::cout << (char)registers[c_ins.arguments[0]]; break;
+		case 0x23: std::cout << registers[c_ins.arguments[0]]; break;
+		case 0x24: std::cout << (int)registers[c_ins.arguments[0]]; break;
+		case 0x25: std::cout << (char)registers[c_ins.arguments[0]]; break;
 
 		default:
 			halt = true;

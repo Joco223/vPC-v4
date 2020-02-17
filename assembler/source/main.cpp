@@ -4,6 +4,7 @@
 
 #include "file_handler.h"
 #include "parser.h"
+#include "compiler.h"
 
 int main(int argc, char** argv) {
 
@@ -19,6 +20,7 @@ int main(int argc, char** argv) {
 	}else{
 		return -1;
 	}
+	compiler::classify_tokens(input_tokens);
 
 	return 0;
 }
