@@ -20,6 +20,15 @@ namespace compiler {
     tt_closed_bracket
   };
 
+  std::unordered_map<int, std::string> token_types_map = {{tt_instruction   , "instruction"        },
+                                                          {tt_value         , "value"              },
+                                                          {tt_register      , "register"           },
+                                                          {tt_address       , "address"            },
+                                                          {tt_identifier    , "identifier"         },
+                                                          {tt_func_def      , "function definition"},
+                                                          {tt_open_bracket  , "open bracket"       },
+                                                          {tt_closed_bracket, "closed bracket"     }};
+
   struct token {
     std::string name;
     int type, line, position;
@@ -41,26 +50,28 @@ namespace compiler {
                                                        {"reg4", 4}, {"reg5", 5}, {"reg6", 6}, {"reg7", 7}};
 
   std::vector<instruction_def> instructions_def = {
-    {"add"     , 0x0B, {tt_register, tt_register}},
-    {"sub"     , 0x0C, {tt_register, tt_register}},
-    {"mlt"     , 0x0D, {tt_register, tt_register}},
-    {"div"     , 0x0E, {tt_register, tt_register}},
-    {"mod"     , 0x0F, {tt_register, tt_register}},
-    {"inc"     , 0x10, {tt_register, tt_register}},
-    {"dec"     , 0x11, {tt_register, tt_register}},
-    {"bigg"    , 0x12, {tt_register, tt_register}},
-    {"bigg_eq" , 0x13, {tt_register, tt_register}},
-    {"small"   , 0x14, {tt_register, tt_register}},
-    {"small_eq", 0x15, {tt_register, tt_register}},
-    {"equal"   , 0x16, {tt_register, tt_register}},
-    {"diff"    , 0x17, {tt_register, tt_register}},
-    {"jmp"     , 0x18, {tt_value                }},
-    {"jmpz"    , 0x19, {tt_value                }},
-    {"jmpo"    , 0x1A, {tt_value                }},
-    {"outu"    , 0x23, {tt_register             }},
-    {"outs"    , 0x24, {tt_register             }},
-    {"out"     , 0x25, {tt_register             }},
-    {"size"    , 0x26, {tt_value                }}
+    {"add"     , 0x0B, {tt_register, tt_register             }},
+    {"sub"     , 0x0C, {tt_register, tt_register             }},
+    {"mlt"     , 0x0D, {tt_register, tt_register             }},
+    {"div"     , 0x0E, {tt_register, tt_register             }},
+    {"mod"     , 0x0F, {tt_register, tt_register             }},
+    {"inc"     , 0x10, {tt_register                          }},
+    {"dec"     , 0x11, {tt_register                          }},
+    {"bigg"    , 0x12, {tt_register, tt_register, tt_register}},
+    {"bigg_eq" , 0x13, {tt_register, tt_register, tt_register}},
+    {"small"   , 0x14, {tt_register, tt_register, tt_register}},
+    {"small_eq", 0x15, {tt_register, tt_register, tt_register}},
+    {"equal"   , 0x16, {tt_register, tt_register, tt_register}},
+    {"diff"    , 0x17, {tt_register, tt_register, tt_register}},
+    {"jmp"     , 0x18, {tt_value                             }},
+    {"jmpz"    , 0x19, {tt_value   , tt_register             }},
+    {"jmpo"    , 0x1A, {tt_value   , tt_register             }},
+    {"outu"    , 0x23, {tt_register                          }},
+    {"outs"    , 0x24, {tt_register                          }},
+    {"outc"    , 0x25, {tt_register                          }},
+    {"size"    , 0x26, {tt_register, tt_value                }},
+    {"in"      , 0x27, {tt_value                             }},
+    {"conv"    , 0x28, {tt_register, tt_value                }}
   };
   //! Instructions set, call, ret, alloc and allocm are special ones and can't be fit here
 
@@ -161,6 +172,7 @@ namespace compiler {
         current_function.name = tokens[i+1].name;
         if (tokens[i+2].type != tt_open_bracket) {
           std::cerr << "Error, invalid function opening: " << tokens[i+2].name << " on line: " << (tokens[i+2].line+1) << " at position: " << (tokens[i+2].position+1) << ".\n";
+          std::cerr << "It should be an open bracket: [\n";
           functions.clear();
           return {-1, functions};
         }else{
@@ -186,6 +198,9 @@ namespace compiler {
               new_instruction.push_back(tokens[i+j+1].values[0].second);
             }else{
               std::cerr << "Invalid argument: " << tokens[i+j+1].name << " on line: " << (tokens[i+j+1].line+1) << " at position: " << (tokens[i+j+1].position+1) << ".\n";
+              std::cerr << "Argument should be: " << token_types_map[instructions_def[instruction_index].arguments[j]] << ".\n";
+              functions.clear();
+              return {-1, functions};
             }
           }
           i += instructions_def[instruction_index].arguments.size();
@@ -227,6 +242,8 @@ namespace compiler {
           }else{
             std::cerr << "Invalid arguments: " << tokens[i+1].name << " on line: " << (tokens[i+1].line+1) << " at position: " << (tokens[i+1].position+1) << ".\n";
             std::cerr << "Invalid arguments: " << tokens[i+2].name << " on line: " << (tokens[i+2].line+1) << " at position: " << (tokens[i+2].position+1) << ".\n";
+            std::cerr << "Argument #1 should be a register or an address.\n";
+            std::cerr << "Argument #2 should be a register or an address.\n";
             functions.clear();
             return {-1, functions};
           }
@@ -247,6 +264,7 @@ namespace compiler {
             new_instruction.push_back(tokens[i+1].values[0].second);
           }else{
             std::cerr << "Invalid argument: " << tokens[i+1].name << " on line: " << (tokens[i+1].line+1) << " at position: " << (tokens[i+1].position+1) << ".\n";
+            std::cerr << "Argument should be a value or a register.\n";
             functions.clear();
             return {-1, functions};
           }
@@ -261,7 +279,10 @@ namespace compiler {
           }else if (tokens[i+1].type == tt_register && tokens[i+2].type == tt_register) {
             new_instruction.push_back(0x22);
           }else{
-            std::cerr << "Invalid argument: " << tokens[i+1].name << " on line: " << (tokens[i+1].line+1) << " at position: " << (tokens[i+1].position+1) << ".\n";
+            std::cerr << "Invalid arguments: " << tokens[i+1].name << " on line: " << (tokens[i+1].line+1) << " at position: " << (tokens[i+1].position+1) << ".\n";
+            std::cerr << "Invalid arguments: " << tokens[i+2].name << " on line: " << (tokens[i+2].line+1) << " at position: " << (tokens[i+2].position+1) << ".\n";
+            std::cerr << "Argument #1 should be a register or a value.\n";
+            std::cerr << "Argument #2 should be a register or a value.\n";
             functions.clear();
             return {-1, functions};
           }
@@ -293,20 +314,21 @@ namespace compiler {
     std::vector<compiler::token> tokens = compiler::classify_tokens(input_tokens);
     std::pair<int, std::vector<function>> functions = generate_functions(tokens);
 
-    std::fstream output_file(output_path, std::ios::out);
-    output_file << std::to_string(functions.first) << '\n';
+    if (functions.first != -1) {
+      std::fstream output_file(output_path, std::ios::out);
+      output_file << std::to_string(functions.first) << '\n';
 
-    for (auto& i : functions.second) {
-      //std::cout << i.name << '\n';
-      for (auto& j : i.intructions) {
-        for (auto& k : j) {
-          output_file << std::to_string(k) << ' ';
+      for (auto& i : functions.second) {
+        for (auto& j : i.intructions) {
+          for (auto& k : j) {
+            output_file << std::to_string(k) << ' ';
+          }
+          output_file << '\n';
         }
-        output_file << '\n';
+        output_file << "###\n";
       }
-      output_file << "###\n";
-    }
 
-    output_file.close();
+      output_file.close();
+    }
   }
 }

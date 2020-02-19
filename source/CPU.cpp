@@ -77,12 +77,12 @@ void CPU::process() {
 		case 0x10: registers[c_ins.arguments[0]]++; break;
 		case 0x11: registers[c_ins.arguments[0]]--; break;
 
-		case 0x12: registers[c_ins.arguments[0]] = registers[c_ins.arguments[0]]  > registers[c_ins.arguments[1]]; break;
-		case 0x13: registers[c_ins.arguments[0]] = registers[c_ins.arguments[0]] >= registers[c_ins.arguments[1]]; break;
-		case 0x14: registers[c_ins.arguments[0]] = registers[c_ins.arguments[0]]  < registers[c_ins.arguments[1]]; break;
-		case 0x15: registers[c_ins.arguments[0]] = registers[c_ins.arguments[0]] <= registers[c_ins.arguments[1]]; break;
-		case 0x16: registers[c_ins.arguments[0]] = registers[c_ins.arguments[0]] == registers[c_ins.arguments[1]]; break;
-		case 0x17: registers[c_ins.arguments[0]] = registers[c_ins.arguments[0]] != registers[c_ins.arguments[1]]; break;
+		case 0x12: registers[c_ins.arguments[2]] = registers[c_ins.arguments[0]]  > registers[c_ins.arguments[1]]; break;
+		case 0x13: registers[c_ins.arguments[2]] = registers[c_ins.arguments[0]] >= registers[c_ins.arguments[1]]; break;
+		case 0x14: registers[c_ins.arguments[2]] = registers[c_ins.arguments[0]]  < registers[c_ins.arguments[1]]; break;
+		case 0x15: registers[c_ins.arguments[2]] = registers[c_ins.arguments[0]] <= registers[c_ins.arguments[1]]; break;
+		case 0x16: registers[c_ins.arguments[2]] = registers[c_ins.arguments[0]] == registers[c_ins.arguments[1]]; break;
+		case 0x17: registers[c_ins.arguments[2]] = registers[c_ins.arguments[0]] != registers[c_ins.arguments[1]]; break;
 		
 		case 0x18: functions.back().instruction_counter = c_ins.arguments[0]; return;
 		case 0x19:
@@ -128,6 +128,19 @@ void CPU::process() {
 		case 0x23: std::cout << registers[c_ins.arguments[0]]; break;
 		case 0x24: std::cout << (int)registers[c_ins.arguments[0]]; break;
 		case 0x25: std::cout << (char)registers[c_ins.arguments[0]]; break;
+		case 0x27: { 
+			std::string input;
+			std::cin >> input;
+			functions.back().memory[c_ins.arguments[0]].clear();
+			for (auto& i : input)
+				functions.back().memory[c_ins.arguments[0]].push_back(static_cast<int>(i));
+			break; }
+		case 0x28: {
+			std::string value = std::to_string(registers[c_ins.arguments[0]]);
+			functions.back().memory[c_ins.arguments[1]].clear();
+			for (auto& i : value)
+				functions.back().memory[c_ins.arguments[1]].push_back(static_cast<int>(i));
+			break; }
 
 		default:
 			halt = true;
