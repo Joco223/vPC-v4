@@ -69,7 +69,8 @@ namespace compiler {
     {"outu"    , 0x23, {tt_register                          }},
     {"outs"    , 0x24, {tt_register                          }},
     {"outc"    , 0x25, {tt_register                          }},
-    {"size"    , 0x26, {tt_register, tt_value                }},
+    {"sizem"   , 0x26, {tt_register, tt_value                }},
+    {"size"    , 0x29, {tt_register,                         }},
     {"in"      , 0x27, {tt_value                             }},
     {"conv"    , 0x28, {tt_register, tt_value                }}
   };

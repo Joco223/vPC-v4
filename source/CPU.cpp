@@ -98,6 +98,8 @@ void CPU::process() {
 
 		case 0x1B: 
 			functions.back().old_registers = registers;
+			registers.clear();
+			registers.resize(8);
 			functions.push_back(function_templates[c_ins.arguments[0]]); 
 			for (int i = 1; i < c_ins.arguments.size(); i++) {
 				functions.back().memory.push_back(functions[functions.size()-2].memory[c_ins.arguments[i]]);
@@ -119,6 +121,7 @@ void CPU::process() {
 		case 0x1E: functions.back().memory.resize(registers[c_ins.arguments[0]]); break;
 
 		case 0x26: registers[c_ins.arguments[0]] = functions.back().memory[c_ins.arguments[1]].size(); break;
+		case 0x29: registers[c_ins.arguments[0]] = functions.back().memory.size(); break;
 
 		case 0x1F: functions.back().memory[c_ins.arguments[0]].resize(c_ins.arguments[1]); break;
 		case 0x20: functions.back().memory[registers[c_ins.arguments[0]]].resize(c_ins.arguments[1]); break;

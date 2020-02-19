@@ -1,0 +1,12 @@
+func main [
+	set reg7 512
+	alloc 1
+	conv reg7 0
+	size reg1 0
+	equal reg0 reg1 reg2
+	jmpo 10 reg2
+		set reg2 #0-reg0
+		outc reg2
+		inc reg0
+		jmp 4
+]

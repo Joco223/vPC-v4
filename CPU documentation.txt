@@ -1,0 +1,60 @@
+By Joco223 - 19/02/2020
+
+VM works on the concept of functions and independant memories for each function.
+VM loads function templates at the start and pushes a copy of the main function to the function stack.
+During operation it works on the top function in the stack. After the instruction coutner has exceeded the number
+of instructions in a function, the function is removed from the stack. If no more functions are left, the CPU halts.
+
+A function memory consists of vectors which contain unsigned ints and VM can on demand 
+allocate more vectors or expand already existing vectors.
+
+The VM currenty has 8 general purpose registers, halt flag and 40 instructions.
+
+It has basic terminal IO, more advanced IO with files etc. will be added later on.
+
+An assembler for the VM is available in assembler/.
+
+Instruction list:
+0x00 - 0 arguments - Halts the CPU.
+0x01 - 2 arguments - Sets the value in a register (first argument) to a value (second argument).
+0x02 - 2 arguments - Sets the value in a register (first argument) to the value in another register (second argument).
+0x03 - 3 arguments - Sets the value in a register (first argument) to the value in a memory address (third argument) in a memory vector (second argument).
+0x04 - 3 arguments - Sets the value in a register (first argument) to the value in a memory address (third argument) in a memory vector pointed to by a register (second argument).
+0x05 - 3 arguments - Sets the value in a register (first argument) to the value in a memory address pointed to by a register (third argument) in a memory vector (second argument).
+0x06 - 3 arguments - Sets the value in a register (first argument) to the value in a memory address pointed to by a register (third argument) in a memory vector pointed to by a register (second argument).
+0x07 - 3 arguments - Sets the value in a memory address (second argument) in a memory vector (first argument) to value in a register (third argument).
+0x08 - 3 arguments - Sets the value in a memory address (second argument) in a memory vector pointed to by a register (first argument) to a value in a register (third argument).
+0x09 - 3 arguments - Sets the value in a memory address pointed to by a register (second argument) in a memory vector (first argument) to value in a register (third argument).
+0x0A - 3 arguments - Sets the value in a memory address pointed to by a register (second argument) in a memory vector pointed to by a register (first argument) to a value in a register (third argument).
+0x0B - 2 arguments - Adds value in the second register (second argument) to the value in the first register (first argument).
+0x0C - 2 arguments - Subtracts value in the first register (first argument) by the value in the second register (second argument).
+0x0D - 2 arguments - Multiplies the value in the first register (first argument) by the value in the second register (second argument).
+0x0E - 2 arguments - Divides the value in the first register (first argument) by the value in the second register (second argument) (Can cause the CPU to halt if the value in the second register is 0).
+0x0F - 2 arguments - Performns modulo operation on the value in the first register (first argument) with the value in the second register (second register).
+0x10 - 1 argument  - Increments the value in a register (first argument).
+0x11 - 1 argument  - Decrements the value in a register (first argument).
+0x12 - 3 arguments - Compares if the value in the first register (first argument) is greater than the value in the second register (second argument) and stores the result in the third register (third argument).
+0x13 - 3 arguments - Compares if the value in the first register (first argument) is greater or equal to the value in the second register (second argument) and stores the result in the third register (third argument).
+0x14 - 3 arguments - Compares if the value in the first register (first argument) is smaller than the value in the second register (second argument) and stores the result in the third register (third argument).
+0x15 - 3 arguments - Compares if the value in the first register (first argument) is smaller or equal to the value in the second register (second argument) and stores the result in the third register (third argument).
+0x16 - 3 arguments - Compares if the value in the first register (first argument) is equal to the value in the second register (second argument) and stores the result in the third register (third argument).
+0x17 - 3 arguments - Compares if the value in the first register (first argument) is different to the value in the second register (second argument) and stores the result in the third register (third argument).
+0x18 - 1 argument  - Sets the instruction counter in the current function to a value (first argument).
+0x19 - 2 arguments - Sets the instruction counter in the current function to a value (first argument) if the value in a register is equal to 0 (second argument).
+0x1A - 2 arguments - Sets the instruction counter in the current function to a value (first argument) if the value in a register is equal to 1 (second argument).
+0x1B - N arguments - (At least one argument) Stores the current values in registers in a buffer in the current function and then clears the values in registers, pushes the new function (first argument) to the function stack,
+                     and then copies the memory vectors from parent function into current memory (all other arguments).
+0x1C - N arguments - Copies the memory vectors from current function into new memory vectors in the parent function (all the arguments), pops the current function from the stack and restores the values in registers from the now current function.
+0x1D - 1 argument  - Resizes current memory vector count to a new size (first argument).
+0x1E - 1 argument  - Resizes current memory vector count to a new size, value in a register (first argument).
+0x1F - 2 arguments - Resizes memory vector (first argument) size to a new size (second argument).
+0x20 - 2 arguments - Resizes memory vector pointed to by a register (first argument) to a new size (second argument).
+0x21 - 2 arguments - Resizes memory vector (first argument) to a new size, value in a register (second argument).
+0x22 - 2 arguments - Resizes memory vector pointed to by a register (first argument) to a new size, value in a register (second argument).
+0x23 - 1 argument  - Outputs value stored in a register (first argument) (As unsigned int).
+0x24 - 1 argument  - Outputs value stored in a register (first argument) (As signed int).
+0x25 - 1 argument  - Outputs value stored in a register (first argument) (As char).
+0x26 - 2 arguments - Stores the memory vector (second argument) size in a register (first argument).
+0x27 - 1 argumnet  - Gets input from console (std::cin) and stores it as separate chars in a memory vector (first argument) (Memory vector is cleared before storing).
+0x28 - 2 arguments - Converts value in a register (first argument) into separate chars and stores it in a memory vector (second argument) (Memory vector is cleared before storing).
+0x29 - 1 argument  - Stores the memory vector count in a register (first argument).

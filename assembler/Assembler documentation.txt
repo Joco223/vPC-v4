@@ -1,0 +1,63 @@
+By Joco223 - 19/02/2020
+
+Instruction is written as following:
+instruction_name argument1 argument2 ...
+
+Comments are written with a semicolon (;), everything after it in the same line is ignored
+
+Functions are declared as follows:
+func main [
+	;Code goes here
+]
+
+Registers are written as reg0, where the number can range from 0 to 7.
+Addresses are written as #0-0, where the first number is the memory vector and the second number is the memory address in the vector. (Both begin from 0)
+The numbers can also be replaces with registers, like this: #reg0-0, #0-reg0, #reg0-reg0
+
+A program must at least contain a function called "main"
+
+Instruction documentation:
+set - 2 arguments - Behaviour depends on the type of arguments
+Register, value                        - Sets the value in a register (first argument) to a value (second argument).
+Register, register                     - Sets the value in a register (first argument) to the value in another register (second argument).
+Register, address (value, value)       - Sets the value in a register (first argument) to the value in a memory address (third argument) in a memory vector (second argument).
+Register, address (register, value)    - Sets the value in a register (first argument) to the value in a memory address (third argument) in a memory vector pointed to by a register (second argument).
+Register, address (value, register)    - Sets the value in a register (first argument) to the value in a memory address pointed to by a register (third argument) in a memory vector (second argument).
+Register, address (register, register) - Sets the value in a register (first argument) to the value in a memory address pointed to by a register (third argument) in a memory vector pointed to by a register (second argument).
+Address (value, value), register       - Sets the value in a memory address (second argument) in a memory vector (first argument) to value in a register (third argument).
+Address (register, value), register    - Sets the value in a memory address (second argument) in a memory vector pointed to by a register (first argument) to a value in a register (third argument).
+Address (value, register), register    - Sets the value in a memory address pointed to by a register (second argument) in a memory vector (first argument) to value in a register (third argument).
+Address (register, register), register - Sets the value in a memory address pointed to by a register (second argument) in a memory vector pointed to by a register (first argument) to a value in a register (third argument).
+
+add      - 2 arguments - Adds value in the second register (second argument) to the value in the first register (first argument).
+sub      - 2 arguments - Subtracts value in the first register (first argument) by the value in the second register (second argument).
+mlt      - 2 arguments - Multiplies the value in the first register (first argument) by the value in the second register (second argument).
+div      - 2 arguments - Divides the value in the first register (first argument) by the value in the second register (second argument) (Can cause the CPU to halt if the value in the second register is 0).
+mod      - 2 arguments - Performns modulo operation on the value in the first register (first argument) with the value in the second register (second register).
+inc      - 1 argument  - Increments the value in a register (first argument).
+dec      - 1 argument  - Decrements the value in a register (first argument).
+bigg     - 3 arguments - Compares if the value in the first register (first argument) is greater than the value in the second register (second argument) and stores the result in the third register (third argument).
+bigg_eq  - 3 arguments - Compares if the value in the first register (first argument) is greater or equal to the value in the second register (second argument) and stores the result in the third register (third argument).
+small    - 3 arguments - Compares if the value in the first register (first argument) is smaller than the value in the second register (second argument) and stores the result in the third register (third argument).
+small_eq - 3 arguments - Compares if the value in the first register (first argument) is smaller or equal to the value in the second register (second argument) and stores the result in the third register (third argument).
+equal    - 3 arguments - Compares if the value in the first register (first argument) is equal to the value in the second register (second argument) and stores the result in the third register (third argument).
+diff     - 3 arguments - Compares if the value in the first register (first argument) is different to the value in the second register (second argument) and stores the result in the third register (third argument).
+jmp      - 1 argument  - Sets the instruction counter in the current function to a value (first argument).
+jmpz     - 2 arguments - Sets the instruction counter in the current function to a value (first argument) if the value in a register is equal to 0 (second argument).
+jmpo     - 2 arguments - Sets the instruction counter in the current function to a value (first argument) if the value in a register is equal to 1 (second argument).
+call     - N arguments - (At least one argument) Stores the current values in registers in a buffer in the current function and then clears the values in registers, pushes the new function (first argument) to the function stack,
+                     and then copies the memory vectors from parent function into current memory (all other arguments).
+ret   - N arguments - Copies the memory vectors from current function into new memory vectors in the parent function (all the arguments), pops the current function from the stack and restores the values in registers from the now current function.
+alloc - 1 argument - (value)    Resizes current memory vector count to a new size (first argument).
+                   - (register) Resizes current memory vector count to a new size, value in a register (first argument).
+allocm - 2 arguments - (value, value)       Resizes memory vector (first argument) size to a new size (second argument).
+                     - (register, value)    Resizes memory vector pointed to by a register (first argument) to a new size (second argument).
+                     - (value, register)    Resizes memory vector (first argument) to a new size, value in a register (second argument).
+                     - (register, register) Resizes memory vector pointed to by a register (first argument) to a new size, value in a register (second argument).
+outu  - 1 argument  - Outputs value stored in a register (first argument) (As unsigned int).
+otus  - 1 argument  - Outputs value stored in a register (first argument) (As signed int).
+outc  - 1 argument  - Outputs value stored in a register (first argument) (As char).
+sizem - 2 arguments - Stores the memory vector (second argument) size in a register (first argument).
+in    - 1 argumnet  - Gets input from console (std::cin) and stores it as separate chars in a memory vector (first argument) (Memory vector is cleared before storing).
+conv  - 2 arguments - Converts value in a register (first argument) into separate chars and stores it in a memory vector (second argument) (Memory vector is cleared before storing).
+size  - 1 argument  - Stores the memory vector count in a register (first argument).
