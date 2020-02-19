@@ -2,7 +2,6 @@
 #include <string>
 #include <vector>
 
-#include "file_handler.h"
 #include "parser.h"
 #include "compiler.h"
 
@@ -13,7 +12,12 @@ int main(int argc, char** argv) {
 		return -1;
 	}
 
-	std::string input_program = file_handler::load_file(argv[1]);
+	std::ifstream file(argv[1]);
+	if (!file.is_open()) {
+		std::cerr << "Error opening file: " << argv[1] << ".\n";
+		return -1;
+	}
+	std::string input_program((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 	std::vector<parser::token> input_tokens = parser::tokenize(input_program);
 	if (!parser::check_tokens(input_tokens))
 		return -1;
