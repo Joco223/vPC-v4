@@ -4,7 +4,41 @@ CPU::CPU() : halt(false) {
 	registers.resize(8); //8 general purpose registers
 }
 
-void CPU::load_functions(const std::string input_file) {}
+void CPU::load_functions(const std::string input_file_path) {
+	std::fstream input_file(input_file_path, std::ios::in);
+	std::string line;
+
+	int main_function = -1;
+	bool first = true;
+	function new_function;
+	while (std::getline(input_file, line)) {
+		if (first) {
+			main_function = std::stoi(line);
+			first = false;
+		}else{
+			if (line == "###") {
+				function_templates.push_back(new_function);
+				new_function.instructions.clear();
+			}else{
+				std::istringstream iss(line);
+				std::string word;
+				instruction new_instruction;
+				bool first_ins = true;
+				while (std::getline(iss, word, ' ')) {
+					if (first_ins) {
+						new_instruction.op_code = std::stoi(word);
+						first_ins = false;
+					}else{
+						new_instruction.arguments.push_back(std::stoi(word));
+					}
+				}
+				new_function.instructions.push_back(new_instruction);
+			}	
+		}
+	}
+
+	functions.push_back(function_templates[main_function]);
+}
 
 void CPU::load_functions(std::vector<function> function_temp, int main_function) {
 	function_templates = function_temp;
@@ -13,7 +47,6 @@ void CPU::load_functions(std::vector<function> function_temp, int main_function)
 
 void CPU::process() {
 	instruction& c_ins = functions.back().instructions[functions.back().instruction_counter];
-
 	switch (c_ins.op_code) {
 		case 0x0:
 			halt = true;
@@ -76,18 +109,21 @@ void CPU::process() {
 				return;
 			}else{
 				for (int i = 0; i < c_ins.arguments.size(); i++) {
-					functions[functions.size()-2].memory.push_back(functions.back().memory[c_ins.arguments[i]]);	
+					functions[functions.size()-2].memory.push_back(functions.back().memory[c_ins.arguments[i]]);
 				}
 				functions.pop_back();
 				registers = functions.back().old_registers;
 				break;
 			}
-		case 0x1D: functions.back().memory.resize(functions.back().memory.size() + c_ins.arguments[0]); break;
-		case 0x1E: functions.back().memory.resize(functions.back().memory.size() + registers[c_ins.arguments[0]]); break;
-		case 0x1F: functions.back().memory[c_ins.arguments[0]].resize(functions.back().memory[c_ins.arguments[0]].size() + c_ins.arguments[1]); break;
-		case 0x20: functions.back().memory[c_ins.arguments[0]].resize(functions.back().memory[registers[c_ins.arguments[0]]].size() + c_ins.arguments[1]); break;
-		case 0x21: functions.back().memory[c_ins.arguments[0]].resize(functions.back().memory[c_ins.arguments[0]].size() + registers[c_ins.arguments[1]]); break;
-		case 0x22: functions.back().memory[c_ins.arguments[0]].resize(functions.back().memory[registers[c_ins.arguments[0]]].size() + registers[c_ins.arguments[1]]); break;
+		case 0x1D: functions.back().memory.resize(c_ins.arguments[0]); break;
+		case 0x1E: functions.back().memory.resize(registers[c_ins.arguments[0]]); break;
+
+		case 0x26: registers[c_ins.arguments[0]] = functions.back().memory[c_ins.arguments[1]].size(); break;
+
+		case 0x1F: functions.back().memory[c_ins.arguments[0]].resize(c_ins.arguments[1]); break;
+		case 0x20: functions.back().memory[registers[c_ins.arguments[0]]].resize(c_ins.arguments[1]); break;
+		case 0x21: functions.back().memory[c_ins.arguments[0]].resize(registers[c_ins.arguments[1]]); break;
+		case 0x22: functions.back().memory[registers[c_ins.arguments[0]]].resize(registers[c_ins.arguments[1]]); break;
 
 		case 0x23: std::cout << registers[c_ins.arguments[0]]; break;
 		case 0x24: std::cout << (int)registers[c_ins.arguments[0]]; break;

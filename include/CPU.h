@@ -2,6 +2,9 @@
 
 #include <vector>
 #include <iostream>
+#include <string>
+#include <fstream>
+#include <sstream>
 
 typedef unsigned char byte;
 typedef unsigned short word;
@@ -32,7 +35,7 @@ private:
 public:
 	CPU();
 
-	void load_functions(const std::string input_file);
+	void load_functions(const std::string input_file_path);
 	void load_functions(std::vector<function> functions, int main_function);
 	void tick();
 

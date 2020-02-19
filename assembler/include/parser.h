@@ -49,7 +49,7 @@ namespace parser {
   const std::vector<std::string> valid_registers    = {"reg0" , "reg1"    , "reg2" , "reg3", "reg4", "reg5", "reg6", "reg7"};
   const std::vector<std::string> valid_instructions = {"set"  , "add"     , "sub"  , "mlt" , "div" , "mod" , "inc" , "dec" , "bigg", "bigg_eq",
                                                        "small", "small_eq", "equal", "diff", "jmp" , "jmpz", "jmpo", "call", "ret" , 
-                                                       "alloc", "allocm"  , "outu" , "outs", "outc"};
+                                                       "alloc", "allocm"  , "outu" , "outs", "outc", "size"};
   const std::vector<std::string> valid_keywords     = {"func", "[", "]"};
 
   std::string assemble_address_regex() {

@@ -15,12 +15,9 @@ int main(int argc, char** argv) {
 
 	std::string input_program = file_handler::load_file(argv[1]);
 	std::vector<parser::token> input_tokens = parser::tokenize(input_program);
-	if (parser::check_tokens(input_tokens)) {
-		std::cout << "All tokens are valid.\n";
-	}else{
+	if (!parser::check_tokens(input_tokens))
 		return -1;
-	}
-	compiler::classify_tokens(input_tokens);
+	compiler::compile(input_tokens, argv[2]);
 
 	return 0;
 }
