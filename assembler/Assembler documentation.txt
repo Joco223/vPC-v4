@@ -28,6 +28,7 @@ Address (value, value), register       - Sets the value in a memory address (sec
 Address (register, value), register    - Sets the value in a memory address (second argument) in a memory vector pointed to by a register (first argument) to a value in a register (third argument).
 Address (value, register), register    - Sets the value in a memory address pointed to by a register (second argument) in a memory vector (first argument) to value in a register (third argument).
 Address (register, register), register - Sets the value in a memory address pointed to by a register (second argument) in a memory vector pointed to by a register (first argument) to a value in a register (third argument).
+Value, string                          - Sets the values in a memory vector (first argument) to characters from string. (This is compile time)
 
 add      - 2 arguments - Adds value in the second register (second argument) to the value in the first register (first argument).
 sub      - 2 arguments - Subtracts value in the first register (first argument) by the value in the second register (second argument).
