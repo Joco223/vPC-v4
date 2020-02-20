@@ -18,7 +18,8 @@ namespace compiler {
     tt_func_def,
     tt_open_bracket,
     tt_closed_bracket,
-    tt_string
+    tt_string,
+    tt_label
   };
 
   std::unordered_map<int, std::string> token_types_map = {{tt_instruction   , "instruction"        },
@@ -142,6 +143,12 @@ namespace compiler {
         continue;
       }
 
+      //* Jump labels
+      if (i.token.back() == ':') {
+        output.push_back({i.token.substr(0, i.token.length()-1), tt_label, i.line, i.position, {}});
+        continue;
+      }
+
       output.push_back({i.token, tt_identifier, i.line, i.position, {{false, 0}}});
     }
 
@@ -175,6 +182,9 @@ namespace compiler {
     //* Parsing instructions
     function current_function;
     current_function.name = "";
+    std::vector<std::string> jump_labels;
+    std::vector<int> jump_label_positions;
+    std::vector<std::pair<int, token>> instructions_to_update;
 
     for (int i = 0; i < tokens.size(); i++) {
       if (tokens[i].type == tt_func_def) {
@@ -186,6 +196,14 @@ namespace compiler {
           return {-1, functions};
         }else{
           i += 2;
+
+          for (int j = i; j < tokens.size(); j++) {
+            if (tokens[j].type == tt_closed_bracket) {
+              break;
+            }else if (tokens[j].type == tt_label) {
+              jump_labels.push_back(tokens[j].name);
+            }
+          }
         }
       }else if(tokens[i].type == tt_closed_bracket) {
         if (current_function.name == "") {
@@ -193,9 +211,22 @@ namespace compiler {
           functions.clear();
           return {-1, functions};
         }else{
+          for (auto& j : instructions_to_update) {
+            if (std::find(jump_labels.begin(), jump_labels.end(), j.second.name) == jump_labels.end()) {
+              std::cout << "Jump label: " << j.second.name << " doesn't exist, on line: " << (j.second.line+1) << ", at position: " << (j.second.position+1) << ".\n";
+              functions.clear();
+              return {-1, functions};
+            }
+
+            current_function.intructions[j.first][1] = jump_label_positions[std::distance(jump_labels.begin(), std::find(jump_labels.begin(), jump_labels.end(), j.second.name))];
+          }
+
           functions.push_back(current_function);
           current_function.name = "";
           current_function.intructions.clear();
+          jump_labels.clear();
+          jump_label_positions.clear();
+          instructions_to_update.clear();
         }
       }else if(tokens[i].type == tt_instruction) {
         std::vector<int> new_instruction;
@@ -206,6 +237,13 @@ namespace compiler {
             if (tokens[i+j+1].type == instructions_def[instruction_index].arguments[j]) {
               new_instruction.push_back(tokens[i+j+1].values[0].second);
             }else{
+              if ((tokens[i].name == "jmp" || tokens[i].name == "jmpo" || tokens[i].name == "jmpz") && j == 0) {
+                if (std::find(jump_labels.begin(), jump_labels.end(), tokens[i+j+1].name) != jump_labels.end()) {
+                  new_instruction.push_back(0);
+                  instructions_to_update.push_back({current_function.intructions.size(), tokens[i+1]});
+                  continue;
+                }
+              }
               std::cerr << "Invalid argument: " << tokens[i+j+1].name << " on line: " << (tokens[i+j+1].line+1) << " at position: " << (tokens[i+j+1].position+1) << ".\n";
               std::cerr << "Argument should be: " << token_types_map[instructions_def[instruction_index].arguments[j]] << ".\n";
               functions.clear();
@@ -254,7 +292,8 @@ namespace compiler {
             for (auto& j : tokens[i+2].name) {
               current_function.memory[tokens[i+1].values[0].second].push_back(j);
             }
-            
+            i += 2;
+            continue;
           }else{
             std::cerr << "Invalid arguments: " << tokens[i+1].name << " on line: " << (tokens[i+1].line+1) << " at position: " << (tokens[i+1].position+1) << ".\n";
             std::cerr << "Invalid arguments: " << tokens[i+2].name << " on line: " << (tokens[i+2].line+1) << " at position: " << (tokens[i+2].position+1) << ".\n";
@@ -316,6 +355,8 @@ namespace compiler {
           i++;
         }
         current_function.intructions.push_back(new_instruction);
+      }else if (tokens[i].type == tt_label) {
+        jump_label_positions.push_back(current_function.intructions.size());
       }else{
         std::cerr << "Error, invalid token: " << tokens[i].name << " on line: " << (tokens[i].line+1) << " at position: " << (tokens[i].position+1) << ".\n";
         functions.clear();

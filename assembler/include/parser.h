@@ -102,6 +102,15 @@ namespace parser {
   bool check_tokens(std::vector<token>& tokens) {
     std::regex address_reg(assemble_address_regex());
 
+    std::vector<std::string> jump_labels;
+
+    for (auto& i : tokens) {
+      if (i.token.back() == ':') {
+        jump_labels.push_back(i.token);
+        jump_labels.push_back(i.token.substr(0, i.token.length()-1));
+      }
+    }
+
     int index = -1;
     for (auto& i : tokens) {
       index++;
@@ -112,6 +121,7 @@ namespace parser {
       if (i.token.find_first_not_of("0123456789") == std::string::npos) continue;                                         //* Valid number
       if (index > 0 && (tokens[index-1].token == "func" || tokens[index-1].token == "call")) continue;                    //* Not checking function names
       if (i.token.substr(0, 3) == "---") continue;                                                                        //* Not checking strings
+      if (std::find(jump_labels.begin(), jump_labels.end(), i.token) != jump_labels.end()) continue;                      //* Not checking jump labels
 
       std::cerr << "Token: \"" << i.token << "\" on line: " << (i.line+1) << ", position: " << (i.position+1) << " doesn't match any valid token. Aborting.\n";
       return false;

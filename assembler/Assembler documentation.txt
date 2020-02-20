@@ -16,6 +16,13 @@ The numbers can also be replaces with registers, like this: #reg0-0, #0-reg0, #r
 
 A program must at least contain a function called "main"
 
+You can write jump labels which can be used for jmp, jmpo and jmpz instructions (the jump labels only exist inside of the function). For example:
+func main [
+start:
+  inc reg0
+  jmp start
+]
+
 Instruction documentation:
 set - 2 arguments - Behaviour depends on the type of arguments
 Register, value                        - Sets the value in a register (first argument) to a value (second argument).
