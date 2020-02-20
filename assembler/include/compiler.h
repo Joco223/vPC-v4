@@ -17,7 +17,8 @@ namespace compiler {
     tt_identifier,
     tt_func_def,
     tt_open_bracket,
-    tt_closed_bracket
+    tt_closed_bracket,
+    tt_string
   };
 
   std::unordered_map<int, std::string> token_types_map = {{tt_instruction   , "instruction"        },
@@ -44,9 +45,10 @@ namespace compiler {
   struct function {
     std::string name;
     std::vector<std::vector<int>> intructions;
+    std::vector<std::vector<unsigned int>> memory;
   };
 
-  std::unordered_map<std::string, int> register_map = {{"reg0", 0}, {"reg1", 1}, {"reg2", 2}, {"reg3", 3}, 
+  std::unordered_map<std::string, int> register_map = {{"reg0", 0}, {"reg1", 1}, {"reg2", 2}, {"reg3", 3},
                                                        {"reg4", 4}, {"reg5", 5}, {"reg6", 6}, {"reg7", 7}};
 
   std::vector<instruction_def> instructions_def = {
@@ -80,7 +82,7 @@ namespace compiler {
     for (int i = 0; i < instructions_def.size(); i++)
       if (token == instructions_def[i].name)
         return i;
-    
+
     return -1;
   }
 
@@ -94,16 +96,16 @@ namespace compiler {
 
       //* Instructions
       if ((instruction_exists(i.token)+1) || i.token == "set" || i.token == "ret" || i.token == "alloc" || i.token == "allocm" || i.token == "call") {
-        output.push_back({i.token, tt_instruction, i.line, i.position, {{false, 0}}}); continue;
+        output.push_back({i.token, tt_instruction, i.line, i.position, {}}); continue;
       }
 
       //* Keywords
       if (i.token == "func") {
-        output.push_back({i.token, tt_func_def, i.line, i.position, {{false, 0}}}); continue;
+        output.push_back({i.token, tt_func_def, i.line, i.position, {}}); continue;
       }else if (i.token == "[") {
-        output.push_back({i.token, tt_open_bracket, i.line, i.position, {{false, 0}}}); continue;
+        output.push_back({i.token, tt_open_bracket, i.line, i.position, {}}); continue;
       }else if (i.token == "]") {
-        output.push_back({i.token, tt_closed_bracket, i.line, i.position, {{false, 0}}}); continue;
+        output.push_back({i.token, tt_closed_bracket, i.line, i.position, {}}); continue;
       }
 
       //* Addresses
@@ -132,6 +134,12 @@ namespace compiler {
       //* Values
       if (i.token.find_first_not_of("0123456789") == std::string::npos) {
         output.push_back({i.token, tt_value, i.line, i.position, {{false, std::stoi(i.token)}}}); continue;
+      }
+
+      //* Strings
+      if (i.token.substr(0, 3) == "---") {
+        output.push_back({i.token.substr(3), tt_string, i.line, i.position, {}});
+        continue;
       }
 
       output.push_back({i.token, tt_identifier, i.line, i.position, {{false, 0}}});
@@ -240,6 +248,13 @@ namespace compiler {
             new_instruction.push_back(tokens[i+1].values[0].second);
             new_instruction.push_back(tokens[i+1].values[1].second);
             new_instruction.push_back(tokens[i+2].values[0].second);
+          }else if(tokens[i+1].type == tt_value && tokens[i+2].type == tt_string) {
+            if (current_function.memory.size() <= tokens[i+1].values[0].second)
+              current_function.memory.resize(tokens[i+1].values[0].second + 1);       
+            for (auto& j : tokens[i+2].name) {
+              current_function.memory[tokens[i+1].values[0].second].push_back(j);
+            }
+            
           }else{
             std::cerr << "Invalid arguments: " << tokens[i+1].name << " on line: " << (tokens[i+1].line+1) << " at position: " << (tokens[i+1].position+1) << ".\n";
             std::cerr << "Invalid arguments: " << tokens[i+2].name << " on line: " << (tokens[i+2].line+1) << " at position: " << (tokens[i+2].position+1) << ".\n";
@@ -320,6 +335,14 @@ namespace compiler {
       output_file << std::to_string(functions.first) << '\n';
 
       for (auto& i : functions.second) {
+        for (auto& j : i.memory) {
+          for (auto& k : j) {
+            output_file << std::to_string(k) << ' ';
+          }
+          output_file << '\n';
+        }
+        output_file << "---\n";
+
         for (auto& j : i.intructions) {
           for (auto& k : j) {
             output_file << std::to_string(k) << ' ';

@@ -27,19 +27,50 @@ namespace parser {
 
   std::vector<token> tokenize(std::string& input) {
     input += " \n";
-    std::regex comment_reg(";(.)*");
-    input = std::regex_replace(input, comment_reg, " ");
+    input = std::regex_replace(input, std::regex(";(.)*"), " ");
     input = std::regex_replace(input, std::regex("\n"), " \n");
     input = std::regex_replace(input, std::regex("\t"), " ");
 
+    std::vector<std::string> strings;
+    std::string tmp_buffer = "---";
+    bool inside_quotes = false;
+
+    for (int i = 1; i < input.length(); i++) {
+      if (input[i] == '\"' && input[i-1] != '\\') {
+        if (!inside_quotes) {
+          inside_quotes = true;
+        }else{
+          inside_quotes = false;
+          strings.push_back(tmp_buffer);
+          tmp_buffer = "---";
+        }
+      }else{
+        if (inside_quotes) {
+          tmp_buffer += input[i];
+        }
+      }
+    }
+
+    for (auto& i : strings)
+      i = std::regex_replace(i, std::regex("\\\""), "\"");
+
+    input = std::regex_replace(input, std::regex("\".*\""), "---");
+
     std::vector<std::string> lines = split(input, '\n');
     std::vector<token> tokens;
+    int string_count = 0;
 
     for (int i = 0; i < lines.size(); i++) {
       std::vector<std::string> split_tokens = split(lines[i], ' ');
       for (int j = 0; j < split_tokens.size(); j++) {
-        if (split_tokens[j] != "")
-          tokens.push_back({split_tokens[j], i, j});
+        if (split_tokens[j] != "") {
+          if (split_tokens[j] == "---") {
+            tokens.push_back({strings[string_count], i, j});
+            string_count++;
+          }else{
+            tokens.push_back({split_tokens[j], i, j});
+            }
+        }
       }
     }
 
@@ -80,6 +111,7 @@ namespace parser {
       if (std::regex_match(i.token, address_reg)) continue;                                                               //* Valid address pattern
       if (i.token.find_first_not_of("0123456789") == std::string::npos) continue;                                         //* Valid number
       if (index > 0 && (tokens[index-1].token == "func" || tokens[index-1].token == "call")) continue;                    //* Not checking function names
+      if (i.token.substr(0, 3) == "---") continue;                                                                        //* Not checking strings
 
       std::cerr << "Token: \"" << i.token << "\" on line: " << (i.line+1) << ", position: " << (i.position+1) << " doesn't match any valid token. Aborting.\n";
       return false;

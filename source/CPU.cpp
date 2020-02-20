@@ -10,6 +10,7 @@ void CPU::load_functions(const std::string input_file_path) {
 
 	int main_function = -1;
 	bool first = true;
+	bool on_memory = true;
 	function new_function;
 	while (std::getline(input_file, line)) {
 		if (first) {
@@ -19,20 +20,38 @@ void CPU::load_functions(const std::string input_file_path) {
 			if (line == "###") {
 				function_templates.push_back(new_function);
 				new_function.instructions.clear();
+			}else if(line == "---") {
+				on_memory = false;
 			}else{
-				std::istringstream iss(line);
-				std::string word;
-				instruction new_instruction;
-				bool first_ins = true;
-				while (std::getline(iss, word, ' ')) {
-					if (first_ins) {
-						new_instruction.op_code = std::stoi(word);
-						first_ins = false;
+				if (line != "") {
+					if (on_memory) {
+						std::istringstream iss(line);
+						std::string word;
+						std::vector<dword> memory_vector;
+						while (std::getline(iss, word, ' ')) {
+							if (word != "") {
+								memory_vector.push_back(std::stoi(word));
+							}
+						}
+						new_function.memory.push_back(memory_vector);
 					}else{
-						new_instruction.arguments.push_back(std::stoi(word));
+						std::istringstream iss(line);
+						std::string word;
+						instruction new_instruction;
+						bool first_ins = true;
+						while (std::getline(iss, word, ' ')) {
+							if (word != ""){
+								if (first_ins) {
+									new_instruction.op_code = std::stoi(word);
+									first_ins = false;
+								}else{
+									new_instruction.arguments.push_back(std::stoi(word));
+								}
+							}
+						}
+						new_function.instructions.push_back(new_instruction);
 					}
 				}
-				new_function.instructions.push_back(new_instruction);
 			}	
 		}
 	}
@@ -155,7 +174,7 @@ void CPU::process() {
 
 void CPU::tick() {
 	if (!halt) {
-		if (functions.back().instruction_counter == functions.back().instructions.size()) {
+		if (functions.back().instruction_counter >= functions.back().instructions.size()) {
 			if (functions.size() == 1) {
 				std::cout << "\nFinished executing.\n";
 				halt = true;
