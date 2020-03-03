@@ -164,6 +164,21 @@ void CPU::process() {
 				functions.back().memory[c_ins.arguments[1]].push_back(static_cast<int>(i));
 			break; }
 
+		case 0x2A: registers[c_ins.arguments[0]] = global_memory[c_ins.arguments[1]][c_ins.arguments[2]]; break;
+		case 0x2B: registers[c_ins.arguments[0]] = global_memory[registers[c_ins.arguments[1]]][c_ins.arguments[2]]; break;
+		case 0x2C: registers[c_ins.arguments[0]] = global_memory[c_ins.arguments[1]][registers[c_ins.arguments[2]]]; break;
+		case 0x2D: registers[c_ins.arguments[0]] = global_memory[registers[c_ins.arguments[1]]][registers[c_ins.arguments[2]]]; break;
+		case 0x2E: global_memory[c_ins.arguments[0]][c_ins.arguments[1]] = registers[c_ins.arguments[2]]; break;
+		case 0x2F: global_memory[registers[c_ins.arguments[0]]][c_ins.arguments[1]] = registers[c_ins.arguments[2]]; break;
+		case 0x30: global_memory[c_ins.arguments[0]][registers[c_ins.arguments[1]]] = registers[c_ins.arguments[2]]; break;
+		case 0x31: global_memory[registers[c_ins.arguments[0]]][registers[c_ins.arguments[1]]] = registers[c_ins.arguments[2]]; break;
+		case 0x32: global_memory.resize(c_ins.arguments[0]); break;
+		case 0x33: global_memory.resize(registers[c_ins.arguments[1]]); break;
+		case 0x34: global_memory[c_ins.arguments[0]].resize(c_ins.arguments[1]); break;
+		case 0x35: global_memory[registers[c_ins.arguments[0]]].resize(c_ins.arguments[1]); break;
+		case 0x36: global_memory[c_ins.arguments[0]].resize(registers[c_ins.arguments[1]]); break;
+		case 0x37: global_memory[registers[c_ins.arguments[0]]].resize(registers[c_ins.arguments[1]]); break;
+
 		default:
 			halt = true;
 			std::cerr << "Unknown instruction: 0x" << std::hex << c_ins.op_code << '\n';

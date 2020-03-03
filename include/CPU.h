@@ -25,6 +25,7 @@ struct function {
 class CPU {
 private:
 	std::vector<dword> registers;
+	std::vector<std::vector<dword>> global_memory;
 	bool halt;
 
 	std::vector<function> function_templates;
