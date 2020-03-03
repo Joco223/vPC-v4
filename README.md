@@ -8,7 +8,9 @@ of instructions in a function, the function is removed from the stack. If no mor
 A function memory consists of vectors which contain unsigned ints and VM can on demand 
 allocate more vectors or expand already existing vectors.
 
-The VM currenty has 8 general purpose registers, halt flag and 40 instructions.
+Global memory also exists which can be accessed from anywhere.
+
+The VM currenty has 8 general purpose registers, halt flag and 57 instructions.
 
 It has basic terminal IO, more advanced IO with files etc. will be added later on.
 
