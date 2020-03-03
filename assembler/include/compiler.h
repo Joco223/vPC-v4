@@ -74,10 +74,14 @@ namespace compiler {
     {"outc"    , 0x25, {tt_register                          }},
     {"sizem"   , 0x26, {tt_register, tt_value                }},
     {"size"    , 0x29, {tt_register,                         }},
+    {"sizeg"   , 0x38, {tt_register                          }},
+    {"sizemg"  , 0x39, {tt_register, tt_value                }},
     {"in"      , 0x27, {tt_value                             }},
-    {"conv"    , 0x28, {tt_register, tt_value                }}
+    {"conv"    , 0x28, {tt_register, tt_value                }},
+    {"set"     , 0x01, {tt_register, tt_value                }},
+    {"setr"    , 0x02, {tt_register, tt_register             }}
   };
-  //! Instructions set, call, ret, alloc and allocm are special ones and can't be fit here
+  //! Instructions mov, call, ret, alloc and allocm are special ones and can't be fit here
 
   int instruction_exists(std::string token) {
     for (int i = 0; i < instructions_def.size(); i++)
@@ -96,7 +100,8 @@ namespace compiler {
       }
 
       //* Instructions
-      if ((instruction_exists(i.token)+1) || i.token == "set" || i.token == "ret" || i.token == "alloc" || i.token == "allocm" || i.token == "call") {
+      if ((instruction_exists(i.token)+1) || i.token == "mov" || i.token == "ret" || i.token == "alloc" || i.token == "allocm" || i.token == "call"
+                                          || i.token == "movg" || i.token == "allocg" || i.token == "allocmg") {
         output.push_back({i.token, tt_instruction, i.line, i.position, {}}); continue;
       }
 
@@ -197,6 +202,7 @@ namespace compiler {
         }else{
           i += 2;
 
+          //* Get all the jump labels in the function
           for (int j = i; j < tokens.size(); j++) {
             if (tokens[j].type == tt_closed_bracket) {
               break;
@@ -233,11 +239,11 @@ namespace compiler {
         int instruction_index = instruction_exists(tokens[i].name);
         if (instruction_index != -1) {
           new_instruction.push_back(instructions_def[instruction_index].op_code);
-          for (int j = 0; j < instructions_def[instruction_index].arguments.size(); j++) {
+          for (int j = 0; j < instructions_def[instruction_index].arguments.size(); j++) { //* Go trough all of the arguments
             if (tokens[i+j+1].type == instructions_def[instruction_index].arguments[j]) {
               new_instruction.push_back(tokens[i+j+1].values[0].second);
             }else{
-              if ((tokens[i].name == "jmp" || tokens[i].name == "jmpo" || tokens[i].name == "jmpz") && j == 0) {
+              if ((tokens[i].name == "jmp" || tokens[i].name == "jmpo" || tokens[i].name == "jmpz") && j == 0) { //* Check if instructions are jmp, jmpo or jmpz if arguments don't match
                 if (std::find(jump_labels.begin(), jump_labels.end(), tokens[i+j+1].name) != jump_labels.end()) {
                   new_instruction.push_back(0);
                   instructions_to_update.push_back({current_function.intructions.size(), tokens[i+1]});
@@ -251,16 +257,8 @@ namespace compiler {
             }
           }
           i += instructions_def[instruction_index].arguments.size();
-        }else if (tokens[i].name == "set") {
-          if (tokens[i+1].type == tt_register && tokens[i+2].type == tt_value) {
-            new_instruction.push_back(0x01);
-            new_instruction.push_back(tokens[i+1].values[0].second);
-            new_instruction.push_back(tokens[i+2].values[0].second);
-          }else if (tokens[i+1].type == tt_register && tokens[i+2].type == tt_register) {
-            new_instruction.push_back(0x02);
-            new_instruction.push_back(tokens[i+1].values[0].second);
-            new_instruction.push_back(tokens[i+2].values[0].second);
-          }else if (tokens[i+1].type == tt_register && tokens[i+2].type == tt_address) {
+        }else if (tokens[i].name == "mov") {
+          if (tokens[i+1].type == tt_register && tokens[i+2].type == tt_address) {
             if (!tokens[i+2].values[0].first && !tokens[i+2].values[1].first) {
               new_instruction.push_back(0x03);
             }else if (tokens[i+2].values[0].first && !tokens[i+2].values[1].first) {
@@ -303,6 +301,42 @@ namespace compiler {
             return {-1, functions};
           }
           i += 2;
+        }else if(tokens[i].name == "movg") {
+          if (tokens[i+1].type == tt_register && tokens[i+2].type == tt_address) {
+            if (!tokens[i+2].values[0].first && !tokens[i+2].values[1].first) {
+              new_instruction.push_back(0x2A);
+            }else if (tokens[i+2].values[0].first && !tokens[i+2].values[1].first) {
+              new_instruction.push_back(0x2B);
+            }else if (!tokens[i+2].values[0].first && tokens[i+2].values[1].first) {
+              new_instruction.push_back(0x2C);
+            }else if (tokens[i+2].values[0].first && tokens[i+2].values[1].first) {
+              new_instruction.push_back(0x2D);
+            }
+            new_instruction.push_back(tokens[i+1].values[0].second);
+            new_instruction.push_back(tokens[i+2].values[0].second);
+            new_instruction.push_back(tokens[i+2].values[1].second);
+          }else if (tokens[i+1].type == tt_address && tokens[i+2].type == tt_register) {
+            if (!tokens[i+1].values[0].first && !tokens[i+1].values[1].first) {
+              new_instruction.push_back(0x2E);
+            }else if (tokens[i+1].values[0].first && !tokens[i+1].values[1].first) {
+              new_instruction.push_back(0x2F);
+            }else if (!tokens[i+1].values[0].first && tokens[i+1].values[1].first) {
+              new_instruction.push_back(0x30);
+            }else if (tokens[i+1].values[0].first && tokens[i+1].values[1].first) {
+              new_instruction.push_back(0x31);
+            }
+            new_instruction.push_back(tokens[i+1].values[0].second);
+            new_instruction.push_back(tokens[i+1].values[1].second);
+            new_instruction.push_back(tokens[i+2].values[0].second);
+          }else{
+            std::cerr << "Invalid arguments: " << tokens[i+1].name << " on line: " << (tokens[i+1].line+1) << " at position: " << (tokens[i+1].position+1) << ".\n";
+            std::cerr << "Invalid arguments: " << tokens[i+2].name << " on line: " << (tokens[i+2].line+1) << " at position: " << (tokens[i+2].position+1) << ".\n";
+            std::cerr << "Argument #1 should be a register or an address.\n";
+            std::cerr << "Argument #2 should be a register or an address.\n";
+            functions.clear();
+            return {-1, functions};
+          }
+          i += 2;
         }else if (tokens[i].name == "ret") {
           new_instruction.push_back(0x1C);
           int index = 1;
@@ -333,6 +367,40 @@ namespace compiler {
             new_instruction.push_back(0x21);
           }else if (tokens[i+1].type == tt_register && tokens[i+2].type == tt_register) {
             new_instruction.push_back(0x22);
+          }else{
+            std::cerr << "Invalid arguments: " << tokens[i+1].name << " on line: " << (tokens[i+1].line+1) << " at position: " << (tokens[i+1].position+1) << ".\n";
+            std::cerr << "Invalid arguments: " << tokens[i+2].name << " on line: " << (tokens[i+2].line+1) << " at position: " << (tokens[i+2].position+1) << ".\n";
+            std::cerr << "Argument #1 should be a register or a value.\n";
+            std::cerr << "Argument #2 should be a register or a value.\n";
+            functions.clear();
+            return {-1, functions};
+          }
+          new_instruction.push_back(tokens[i+1].values[0].second);
+          new_instruction.push_back(tokens[i+2].values[0].second);
+          i += 2;
+        }else if (tokens[i].name == "allocg") {
+          if (tokens[i+1].type == tt_value) {
+            new_instruction.push_back(0x32);
+            new_instruction.push_back(tokens[i+1].values[0].second);
+          }else if (tokens[i+1].type == tt_register) {
+            new_instruction.push_back(0x33);
+            new_instruction.push_back(tokens[i+1].values[0].second);
+          }else{
+            std::cerr << "Invalid argument: " << tokens[i+1].name << " on line: " << (tokens[i+1].line+1) << " at position: " << (tokens[i+1].position+1) << ".\n";
+            std::cerr << "Argument should be a value or a register.\n";
+            functions.clear();
+            return {-1, functions};
+          }
+          i++;
+        }else if (tokens[i].name == "allocmg") {
+          if (tokens[i+1].type == tt_value && tokens[i+2].type == tt_value) {
+            new_instruction.push_back(0x34);
+          }else if (tokens[i+1].type == tt_register && tokens[i+2].type == tt_value) {
+            new_instruction.push_back(0x35);
+          }else if (tokens[i+1].type == tt_value && tokens[i+2].type == tt_register) {
+            new_instruction.push_back(0x36);
+          }else if (tokens[i+1].type == tt_register && tokens[i+2].type == tt_register) {
+            new_instruction.push_back(0x37);
           }else{
             std::cerr << "Invalid arguments: " << tokens[i+1].name << " on line: " << (tokens[i+1].line+1) << " at position: " << (tokens[i+1].position+1) << ".\n";
             std::cerr << "Invalid arguments: " << tokens[i+2].name << " on line: " << (tokens[i+2].line+1) << " at position: " << (tokens[i+2].position+1) << ".\n";

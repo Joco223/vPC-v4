@@ -172,12 +172,16 @@ void CPU::process() {
 		case 0x2F: global_memory[registers[c_ins.arguments[0]]][c_ins.arguments[1]] = registers[c_ins.arguments[2]]; break;
 		case 0x30: global_memory[c_ins.arguments[0]][registers[c_ins.arguments[1]]] = registers[c_ins.arguments[2]]; break;
 		case 0x31: global_memory[registers[c_ins.arguments[0]]][registers[c_ins.arguments[1]]] = registers[c_ins.arguments[2]]; break;
+
 		case 0x32: global_memory.resize(c_ins.arguments[0]); break;
 		case 0x33: global_memory.resize(registers[c_ins.arguments[1]]); break;
 		case 0x34: global_memory[c_ins.arguments[0]].resize(c_ins.arguments[1]); break;
 		case 0x35: global_memory[registers[c_ins.arguments[0]]].resize(c_ins.arguments[1]); break;
 		case 0x36: global_memory[c_ins.arguments[0]].resize(registers[c_ins.arguments[1]]); break;
 		case 0x37: global_memory[registers[c_ins.arguments[0]]].resize(registers[c_ins.arguments[1]]); break;
+
+		case 0x38: registers[c_ins.arguments[0]] = global_memory[c_ins.arguments[1]].size(); break;
+		case 0x39: registers[c_ins.arguments[0]] = global_memory.size(); break;
 
 		default:
 			halt = true;

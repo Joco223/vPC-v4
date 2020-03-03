@@ -1,0 +1,8 @@
+func main [
+	allocg 1
+	allocmg 0 1
+	set reg0 50
+	movg #0-0 reg0
+	movg reg1 #0-0
+	outu reg1
+]

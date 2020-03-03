@@ -3,10 +3,12 @@ func main [
 	alloc 1
 	conv reg7 0
 	sizem reg1 0
+loop:
 	equal reg0 reg1 reg2
-	jmpo 10 reg2
-		set reg2 #0-reg0
+	jmpo end reg2
+		mov reg2 #0-reg0
 		outc reg2
 		inc reg0
-		jmp 4
+		jmp loop
+end:
 ]

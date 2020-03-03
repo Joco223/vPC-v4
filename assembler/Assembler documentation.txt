@@ -24,9 +24,7 @@ start:
 ]
 
 Instruction documentation:
-set - 2 arguments - Behaviour depends on the type of arguments
-Register, value                        - Sets the value in a register (first argument) to a value (second argument).
-Register, register                     - Sets the value in a register (first argument) to the value in another register (second argument).
+mov - 2 arguments - Behaviour depends on the type of arguments
 Register, address (value, value)       - Sets the value in a register (first argument) to the value in a memory address (third argument) in a memory vector (second argument).
 Register, address (register, value)    - Sets the value in a register (first argument) to the value in a memory address (third argument) in a memory vector pointed to by a register (second argument).
 Register, address (value, register)    - Sets the value in a register (first argument) to the value in a memory address pointed to by a register (third argument) in a memory vector (second argument).
@@ -37,6 +35,18 @@ Address (value, register), register    - Sets the value in a memory address poin
 Address (register, register), register - Sets the value in a memory address pointed to by a register (second argument) in a memory vector pointed to by a register (first argument) to a value in a register (third argument).
 Value, string                          - Sets the values in a memory vector (first argument) to characters from string. (This is compile time)
 
+movg - 2 arguments - Behaviour depends on the type of arguments
+Register, address (value, value)       - Sets the value in a register (first argument) to the value in a memory address (third argument) in a memory vector (second argument) (In global memory).
+Register, address (register, value)    - Sets the value in a register (first argument) to the value in a memory address (third argument) in a memory vector pointed to by a register (second argument) (In global memory).
+Register, address (value, register)    - Sets the value in a register (first argument) to the value in a memory address pointed to by a register (third argument) in a memory vector (second argument) (In global memory).
+Register, address (register, register) - Sets the value in a register (first argument) to the value in a memory address pointed to by a register (third argument) in a memory vector pointed to by a register (second argument) (In global memory).
+Address (value, value), register       - Sets the value in a memory address (second argument) in a memory vector (first argument) to value in a register (third argument) (In global memory).
+Address (register, value), register    - Sets the value in a memory address (second argument) in a memory vector pointed to by a register (first argument) to a value in a register (third argument) (In global memory).
+Address (value, register), register    - Sets the value in a memory address pointed to by a register (second argument) in a memory vector (first argument) to value in a register (third argument) (In global memory).
+Address (register, register), register - Sets the value in a memory address pointed to by a register (second argument) in a memory vector pointed to by a register (first argument) to a value in a register (third argument) (In global memory).
+
+set      - 2 arguments - Sets the value in a register (first argument) to a value (second argument).
+setr     - 2 arguments - Sets the value in a register (first argument) to the value in another register (second argument).
 add      - 2 arguments - Adds value in the second register (second argument) to the value in the first register (first argument).
 sub      - 2 arguments - Subtracts value in the first register (first argument) by the value in the second register (second argument).
 mlt      - 2 arguments - Multiplies the value in the first register (first argument) by the value in the second register (second argument).
@@ -62,6 +72,12 @@ allocm - 2 arguments - (value, value)       Resizes memory vector (first argumen
                      - (register, value)    Resizes memory vector pointed to by a register (first argument) to a new size (second argument).
                      - (value, register)    Resizes memory vector (first argument) to a new size, value in a register (second argument).
                      - (register, register) Resizes memory vector pointed to by a register (first argument) to a new size, value in a register (second argument).
+allocg - 1 argument - (value)    Resizes current memory vector count to a new size (first argument) (In global memory).
+                    - (register) Resizes current memory vector count to a new size, value in a register (first argument) (In global memory).
+allocmg - 2 arguments - (value, value)       Resizes memory vector (first argument) size to a new size (second argument) (In global memory).
+                      - (register, value)    Resizes memory vector pointed to by a register (first argument) to a new size (second argument) (In global memory).
+                      - (value, register)    Resizes memory vector (first argument) to a new size, value in a register (second argument) (In global memory).
+                      - (register, register) Resizes memory vector pointed to by a register (first argument) to a new size, value in a register (second argument) (In global memory).
 outu  - 1 argument  - Outputs value stored in a register (first argument) (As unsigned int).
 otus  - 1 argument  - Outputs value stored in a register (first argument) (As signed int).
 outc  - 1 argument  - Outputs value stored in a register (first argument) (As char).
